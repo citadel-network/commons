@@ -31,6 +31,11 @@ export function findAllTags(
   return filtered.map((t) => t.slice(1));
 }
 
+export function findTag(event: Event, tag: string): string | undefined {
+  const allTags = findAllTags(event, tag);
+  return allTags && allTags[0] && allTags[0][0];
+}
+
 export function sortEvents(events: List<Event>): List<Event> {
   return events.sortBy((event, index) =>
     parseFloat(`${event.created_at}.${index}`)
