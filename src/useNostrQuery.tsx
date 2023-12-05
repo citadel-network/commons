@@ -117,7 +117,7 @@ export function useEventQuery(
   };
 }
 
-function findAllRelays(event: Event): Array<Relay> {
+export function findAllRelays(event: Event): Array<Relay> {
   const relayTags = findAllTags(event, "r");
   if (!relayTags) {
     return [];
