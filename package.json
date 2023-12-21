@@ -20,10 +20,10 @@
   },
   "homepage": "https://github.com/citadel-network/commons#readme",
   "dependencies": {
-    "@types/react": "^16.14.52",
+    "@types/react": "^18.2.45",
     "immutable": "^4.1.0",
     "nostr-tools": "^1.17.0",
-    "react": "^16.14.0",
+    "react": "^18.2.0",
     "typescript": "^5.3.2"
   }
 }
