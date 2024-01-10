@@ -5,17 +5,17 @@ import { Collection, List, Map, OrderedMap } from "immutable";
 export const KIND_RELAY_METADATA_EVENT = 10002;
 
 export type Relay = {
-    url: string;
-    read: boolean;
-    write: boolean;
-  };
+  url: string;
+  read: boolean;
+  write: boolean;
+};
 
-type EventQueryResult = {
+export type EventQueryResult = {
   events: OrderedMap<string, Event>;
   eose: boolean;
 };
 
-type EventQueryProps = {
+export type EventQueryProps = {
   enabled?: boolean;
   readFromRelays?: Array<Relay>;
 };
@@ -43,8 +43,17 @@ export function sortEvents(events: List<Event>): List<Event> {
 }
 
 export function sortEventsDescending(events: List<Event>): List<Event> {
-  return events.sortBy((event, index) =>
-    parseFloat(`${-event.created_at}.${index}`)
+  return events.sortBy(
+    (event, index) => [event.created_at, index],
+    (a, b) => {
+      if (a[0] !== b[0]) {
+        return a[0] < b[0] ? 1 : -1;
+      }
+      if (a[0] === b[0]) {
+        return a[1] < b[1] ? 1 : -1;
+      }
+      return 0;
+    }
   );
 }
 
@@ -164,10 +173,14 @@ export function useRelaysQuery(
   relays: Array<Relay>;
   eose: boolean;
 } {
-  const { events, eose } = useEventQuery(simplePool, [createRelaysQuery(authors)], {
-    enabled,
-    readFromRelays: startingRelays,
-  });
+  const { events, eose } = useEventQuery(
+    simplePool,
+    [createRelaysQuery(authors)],
+    {
+      enabled,
+      readFromRelays: startingRelays,
+    }
+  );
 
   if (!eose) {
     return { relays: startingRelays, eose };
