@@ -9,7 +9,7 @@ function createSubs(
   relayPool: SimplePool,
   relayUrls: string[],
   authors: string[],
-  filters: Filter[],
+  filters: GroupedByAuthorFilter[],
   setEvents: (
     updater: (
       existingEvents: Map<string, OrderedMap<string, Event>>
@@ -21,7 +21,11 @@ function createSubs(
 ): Map<string, Sub> {
   return Map<string, Sub>(
     authors.map((author) => {
-      const sub = relayPool.sub(relayUrls, filters);
+      const filtersWithAuthor = filters.map((filter) => ({
+        ...filter,
+        authors: [author],
+      }));
+      const sub = relayPool.sub(relayUrls, filtersWithAuthor);
       const eventHandler = (event: Event): void => {
         setEvents((existingEventsByAuthor) => {
           const existingEvents = existingEventsByAuthor.get(
