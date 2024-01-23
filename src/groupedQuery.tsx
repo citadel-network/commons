@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Map, OrderedMap } from "immutable";
-import { SimplePool, Filter, Sub, Event } from "nostr-tools";
+import { SimplePool, Filter, Event, SubCloser } from "nostr-tools";
 import { EventQueryResult, EventQueryProps } from "./useNostrQuery";
 
-export type GroupedByAuthorFilter = Omit<Filter<number>, "authors">;
+export type GroupedByAuthorFilter = Omit<Filter, "authors">;
 
 function createSubs(
   relayPool: SimplePool,
@@ -18,45 +18,45 @@ function createSubs(
   setEose: (
     updater: (existingEose: Map<string, boolean>) => Map<string, boolean>
   ) => void
-): Map<string, Sub> {
-  return Map<string, Sub>(
+): Map<string, SubCloser> {
+  return Map<string, SubCloser>(
     authors.map((author) => {
       const filtersWithAuthor = filters.map((filter) => ({
         ...filter,
         authors: [author],
       }));
-      const sub = relayPool.sub(relayUrls, filtersWithAuthor);
-      const eventHandler = (event: Event): void => {
-        setEvents((existingEventsByAuthor) => {
-          const existingEvents = existingEventsByAuthor.get(
-            author,
-            OrderedMap<string, Event>()
-          );
-          if (existingEvents.has(event.id)) {
-            return existingEventsByAuthor;
-          }
-          return existingEventsByAuthor.set(
-            author,
-            existingEvents.set(event.id, event)
-          );
-        });
-      };
-      sub.on("eose", () => {
-        setEose((current) => {
-          if (current.get(author)) {
-            return current;
-          }
-          return current.set(author, true);
-        });
+      const sub = relayPool.subscribeMany(relayUrls, filtersWithAuthor, {
+        onevent(event: Event): void {
+          setEvents((existingEventsByAuthor) => {
+            const existingEvents = existingEventsByAuthor.get(
+              author,
+              OrderedMap<string, Event>()
+            );
+            if (existingEvents.has(event.id)) {
+              return existingEventsByAuthor;
+            }
+            return existingEventsByAuthor.set(
+              author,
+              existingEvents.set(event.id, event)
+            );
+          });
+        },
+        oneose() {
+          setEose((current) => {
+            if (current.get(author)) {
+              return current;
+            }
+            return current.set(author, true);
+          });
+        },
       });
-      sub.on("event", eventHandler);
       return [author, sub];
     })
   );
 }
 
-function unsubAll(subs: Map<string, Sub>): void {
-  subs.map((sub) => sub.unsub());
+function unsubAll(subs: Map<string, SubCloser>): void {
+  subs.map((sub) => sub.close());
 }
 
 export function useEventQueryByAuthor(
@@ -72,7 +72,7 @@ export function useEventQueryByAuthor(
   const [eose, setEose] = useState<Map<string, boolean>>(
     Map<string, boolean>()
   );
-  const queries = useRef<Map<string, Sub>>(Map<string, Sub>());
+  const queries = useRef<Map<string, SubCloser>>(Map<string, SubCloser>());
 
   const enabled = !(opts && opts.enabled === false);
   const relayUrls =
@@ -86,6 +86,9 @@ export function useEventQueryByAuthor(
     const startQueriesFor = authors.filter(
       (author) => !queries.current.has(author)
     );
+    if (startQueriesFor.length === 0) {
+      return;
+    }
     const newSubs = createSubs(
       relayPool,
       relayUrls,
@@ -106,6 +109,9 @@ export function useEventQueryByAuthor(
     const startQueriesFor = authors.filter(
       (author) => !queries.current.has(author)
     );
+    if (startQueriesFor.length === 0) {
+      return;
+    }
     const newSubs = createSubs(
       relayPool,
       relayUrls,
@@ -119,7 +125,7 @@ export function useEventQueryByAuthor(
     return () => {
       unsubAll(queries.current);
       // eslint-disable-next-line functional/immutable-data
-      queries.current = Map<string, Sub>();
+      queries.current = Map<string, SubCloser>();
     };
   }, [enabled, relayUrls]);
 

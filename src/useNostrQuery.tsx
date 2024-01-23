@@ -66,7 +66,7 @@ export function getMostRecentReplacableEvent(
 
 export function useEventQuery(
   relayPool: SimplePool,
-  filters: Filter<number>[],
+  filters: Filter[],
   opts?: EventQueryProps
 ): EventQueryResult {
   const [events, setEvents] = useState<Map<string, Event>>(
@@ -91,28 +91,26 @@ export function useEventQuery(
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       return () => {};
     }
-    const sub = relayPool.sub(relayUrls, filters);
-    const eventHandler = (event: Event): void => {
-      if (!componentIsMounted.current) {
-        return;
-      }
-      setEvents((existingEvents) => {
-        if (existingEvents.has(event.id)) {
-          return existingEvents;
+    const sub = relayPool.subscribeMany(relayUrls, filters, {
+      onevent(event: Event): void {
+        if (!componentIsMounted.current) {
+          return;
         }
-        return existingEvents.set(event.id, event);
-      });
-    };
-
-    sub.on("eose", () => {
-      if (componentIsMounted.current && !eose) {
-        setEose(true);
-      }
+        setEvents((existingEvents) => {
+          if (existingEvents.has(event.id)) {
+            return existingEvents;
+          }
+          return existingEvents.set(event.id, event);
+        });
+      },
+      oneose() {
+        if (componentIsMounted.current && !eose) {
+          setEose(true);
+        }
+      },
     });
-    sub.on("event", eventHandler);
-
     return () => {
-      sub.unsub();
+      sub.close();
     };
   }, [
     enabled,
@@ -157,7 +155,7 @@ export function findAllRelays(event: Event): Array<Relay> {
     });
 }
 
-function createRelaysQuery(nostrPublicKeys: Array<string>): Filter<number> {
+function createRelaysQuery(nostrPublicKeys: Array<string>): Filter {
   return {
     kinds: [KIND_RELAY_METADATA_EVENT],
     authors: nostrPublicKeys,
