@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { Event, Filter, SimplePool } from "nostr-tools";
+import { Event, UnsignedEvent, Filter, SimplePool } from "nostr-tools";
 import { Collection, List, Map, OrderedMap } from "immutable";
 
 export const KIND_RELAY_METADATA_EVENT = 10002;
@@ -21,7 +21,7 @@ export type EventQueryProps = {
 };
 
 export function findAllTags(
-  event: Event,
+  event: UnsignedEvent,
   tag: string
 ): Array<Array<string>> | undefined {
   const filtered = event.tags.filter(([tagName]) => tagName === tag);
@@ -31,18 +31,18 @@ export function findAllTags(
   return filtered.map((t) => t.slice(1));
 }
 
-export function findTag(event: Event, tag: string): string | undefined {
+export function findTag(event: UnsignedEvent, tag: string): string | undefined {
   const allTags = findAllTags(event, tag);
   return allTags && allTags[0] && allTags[0][0];
 }
 
-export function sortEvents(events: List<Event>): List<Event> {
+export function sortEvents(events: List<UnsignedEvent | Event>): List<UnsignedEvent | Event> {
   return events.sortBy((event, index) =>
     parseFloat(`${event.created_at}.${index}`)
   );
 }
 
-export function sortEventsDescending(events: List<Event>): List<Event> {
+export function sortEventsDescending(events: List<UnsignedEvent | Event>): List<UnsignedEvent | Event> {
   return events.sortBy(
     (event, index) => [event.created_at, index],
     (a, b) => {
@@ -58,8 +58,8 @@ export function sortEventsDescending(events: List<Event>): List<Event> {
 }
 
 export function getMostRecentReplacableEvent(
-  events: Collection<string, Event> | List<Event>
-): Event | undefined {
+  events: Collection<string, UnsignedEvent | Event> | List<UnsignedEvent | Event>
+): UnsignedEvent | Event | undefined {
   const listOfEvents = List.isList(events) ? events : events.toList();
   return sortEventsDescending(listOfEvents).first(undefined);
 }
@@ -124,7 +124,7 @@ export function useEventQuery(
   };
 }
 
-export function findAllRelays(event: Event): Array<Relay> {
+export function findAllRelays(event: UnsignedEvent): Array<Relay> {
   const relayTags = findAllTags(event, "r");
   if (!relayTags) {
     return [];
