@@ -18,6 +18,14 @@ export type EventQueryResult = {
 export type EventQueryProps = {
   enabled?: boolean;
   readFromRelays?: Array<Relay>;
+  discardOld?: boolean;
+  filter?: (event: Event) => boolean;
+};
+
+const DEFAULTS: EventQueryProps = {
+  enabled: true,
+  readFromRelays: [],
+  discardOld: false,
 };
 
 export function findAllTags(
@@ -36,13 +44,17 @@ export function findTag(event: UnsignedEvent, tag: string): string | undefined {
   return allTags && allTags[0] && allTags[0][0];
 }
 
-export function sortEvents(events: List<UnsignedEvent | Event>): List<UnsignedEvent | Event> {
+export function sortEvents(
+  events: List<UnsignedEvent | Event>
+): List<UnsignedEvent | Event> {
   return events.sortBy((event, index) =>
     parseFloat(`${event.created_at}.${index}`)
   );
 }
 
-export function sortEventsDescending(events: List<UnsignedEvent | Event>): List<UnsignedEvent | Event> {
+export function sortEventsDescending(
+  events: List<UnsignedEvent | Event>
+): List<UnsignedEvent | Event> {
   return events.sortBy(
     (event, index) => [event.created_at, index],
     (a, b) => {
@@ -58,7 +70,9 @@ export function sortEventsDescending(events: List<UnsignedEvent | Event>): List<
 }
 
 export function getMostRecentReplacableEvent(
-  events: Collection<string, UnsignedEvent | Event> | List<UnsignedEvent | Event>
+  events:
+    | Collection<string, UnsignedEvent | Event>
+    | List<UnsignedEvent | Event>
 ): UnsignedEvent | Event | undefined {
   const listOfEvents = List.isList(events) ? events : events.toList();
   return sortEventsDescending(listOfEvents).first(undefined);
@@ -81,10 +95,14 @@ export function useEventQuery(
       componentIsMounted.current = false;
     };
   }, []);
-
-  const enabled = !(opts && opts.enabled === false);
-  const relayUrls =
-    opts && opts.readFromRelays ? opts.readFromRelays.map((r) => r.url) : [];
+  const options = { ...DEFAULTS, ...opts } as {
+    enabled: boolean;
+    readFromRelays: Array<Relay>;
+    discardOld: boolean;
+    filter?: (event: Event) => boolean;
+  };
+  const enabled = options.enabled;
+  const relayUrls = options.readFromRelays.map((r) => r.url);
 
   useEffect(() => {
     if (!enabled) {
@@ -97,7 +115,10 @@ export function useEventQuery(
           return;
         }
         setEvents((existingEvents) => {
-          if (existingEvents.has(event.id)) {
+          if (
+            existingEvents.has(event.id) ||
+            (options.filter && !options.filter(event))
+          ) {
             return existingEvents;
           }
           return existingEvents.set(event.id, event);
@@ -111,6 +132,10 @@ export function useEventQuery(
     });
     return () => {
       sub.close();
+      if (options.discardOld) {
+        setEose(false);
+        setEvents(OrderedMap<string, Event>());
+      }
     };
   }, [
     enabled,
@@ -189,4 +214,8 @@ export function useRelaysQuery(
     return { relays: findAllRelays(newestEvent), eose };
   }
   return { relays: startingRelays, eose };
+}
+
+export function getReadRelays(relays: Array<Relay>): Array<Relay> {
+  return relays.filter((r) => r.read === true);
 }
