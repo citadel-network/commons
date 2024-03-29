@@ -4,6 +4,8 @@ import { Collection, List, Map, OrderedMap } from "immutable";
 
 export const KIND_RELAY_METADATA_EVENT = 10002;
 
+const CLOSE_CONNECTION_TIMEOUT = 1000;
+
 export type Relay = {
   url: string;
   read: boolean;
@@ -129,7 +131,7 @@ export function useEventQuery(
           setEose(true);
         }
       },
-      maxWait: 500,
+      maxWait: CLOSE_CONNECTION_TIMEOUT,
     });
     return () => {
       sub.close();
