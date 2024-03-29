@@ -109,7 +109,7 @@ export function useEventQuery(
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       return () => {};
     }
-    const sub = relayPool.subscribeMany(relayUrls, filters, {
+    const sub = relayPool.subscribeManyEose(relayUrls, filters, {
       onevent(event: Event): void {
         if (!componentIsMounted.current) {
           return;
@@ -124,11 +124,12 @@ export function useEventQuery(
           return existingEvents.set(event.id, event);
         });
       },
-      oneose() {
+      onclose() {
         if (componentIsMounted.current && !eose) {
           setEose(true);
         }
       },
+      maxWait: 500,
     });
     return () => {
       sub.close();
