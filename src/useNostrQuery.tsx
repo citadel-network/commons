@@ -111,7 +111,7 @@ export function useEventQuery(
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       return () => {};
     }
-    const sub = relayPool.subscribeManyEose(relayUrls, filters, {
+    const sub = relayPool.subscribeMany(relayUrls, filters, {
       onevent(event: Event): void {
         if (!componentIsMounted.current) {
           return;
@@ -126,7 +126,7 @@ export function useEventQuery(
           return existingEvents.set(event.id, event);
         });
       },
-      onclose() {
+      oneose() {
         if (componentIsMounted.current && !eose) {
           setEose(true);
         }
