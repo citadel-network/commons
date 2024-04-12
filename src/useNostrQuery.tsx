@@ -219,3 +219,7 @@ export function useRelaysQuery(
 export function getReadRelays(relays: Array<Relay>): Array<Relay> {
   return relays.filter((r) => r.read === true);
 }
+
+export function getWriteRelays(relays: Array<Relay>): Array<Relay> {
+  return relays.filter((r) => r.write === true);
+}
