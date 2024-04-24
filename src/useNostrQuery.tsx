@@ -180,7 +180,7 @@ export function findAllRelays(event: UnsignedEvent): Array<Relay> {
     });
 }
 
-function createRelaysQuery(nostrPublicKeys: Array<string>): Filter {
+export function createRelaysQuery(nostrPublicKeys: Array<string>): Filter {
   return {
     kinds: [KIND_RELAY_METADATA_EVENT],
     authors: nostrPublicKeys,
