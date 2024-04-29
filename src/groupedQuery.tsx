@@ -110,7 +110,8 @@ export function useEventQueryByAuthor(
       (author) => !queries.current.has(author)
     );
     if (startQueriesFor.length === 0) {
-      return;
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      return () => {};
     }
     const newSubs = createSubs(
       relayPool,

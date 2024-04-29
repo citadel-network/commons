@@ -7,7 +7,7 @@
       "esnext"
     ],
     "outDir": "./dist",
-    "baseUrl": "./",
+    "baseUrl": "./libs/commons",
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,

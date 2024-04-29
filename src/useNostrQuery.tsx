@@ -1,14 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Event, UnsignedEvent, Filter, SimplePool } from "nostr-tools";
 import { Collection, List, Map, OrderedMap } from "immutable";
-
-export const KIND_RELAY_METADATA_EVENT = 10002;
-
-export type Relay = {
-  url: string;
-  read: boolean;
-  write: boolean;
-};
+import { KIND_RELAY_METADATA_EVENT } from "./nostr";
 
 export type EventQueryResult = {
   events: OrderedMap<string, Event>;
@@ -101,7 +94,7 @@ export function useEventQuery(
     discardOld: boolean;
     filter?: (event: Event) => boolean;
   };
-  const enabled = options.enabled;
+  const { enabled } = options;
   const relayUrls = options.readFromRelays.map((r) => r.url);
 
   useEffect(() => {
@@ -214,12 +207,4 @@ export function useRelaysQuery(
     return { relays: findAllRelays(newestEvent), eose };
   }
   return { relays: startingRelays, eose };
-}
-
-export function getReadRelays(relays: Array<Relay>): Array<Relay> {
-  return relays.filter((r) => r.read === true);
-}
-
-export function getWriteRelays(relays: Array<Relay>): Array<Relay> {
-  return relays.filter((r) => r.write === true);
 }
