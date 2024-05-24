@@ -43,7 +43,11 @@ export function LoadingSpinnerButton({
     }
   };
   if (loading) {
-    return <Spinner animation="border" role="status" />;
+    return (
+      <div style={{ paddingTop: "6px", paddingBottom: "4px" }}>
+        <Spinner animation="border" role="status" />
+      </div>
+    );
   }
   return (
     <Button
