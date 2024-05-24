@@ -6,6 +6,7 @@ export * from "./relaysUtils";
 export * from "./components/Relays";
 export * from "./components/Ui";
 export * from "./components/InputElementUtils";
+export * from "./components/LoadingSpinnerButton";
 export * from "./components/FocusContextProvider";
 export * from "./components/ErrorMessage";
 export * from "./components/NotificationCenter";
