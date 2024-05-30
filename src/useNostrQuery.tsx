@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { Event, UnsignedEvent, Filter, SimplePool } from "nostr-tools";
+import { Event, EventTemplate, Filter, SimplePool } from "nostr-tools";
 import { Collection, List, Map, OrderedMap } from "immutable";
 import { KIND_RELAY_METADATA_EVENT } from "./nostr";
 
@@ -22,7 +22,7 @@ const DEFAULTS: EventQueryProps = {
 };
 
 export function findAllTags(
-  event: UnsignedEvent,
+  event: EventTemplate,
   tag: string
 ): Array<Array<string>> | undefined {
   const filtered = event.tags.filter(([tagName]) => tagName === tag);
@@ -32,22 +32,22 @@ export function findAllTags(
   return filtered.map((t) => t.slice(1));
 }
 
-export function findTag(event: UnsignedEvent, tag: string): string | undefined {
+export function findTag(event: EventTemplate, tag: string): string | undefined {
   const allTags = findAllTags(event, tag);
   return allTags && allTags[0] && allTags[0][0];
 }
 
 export function sortEvents(
-  events: List<UnsignedEvent | Event>
-): List<UnsignedEvent | Event> {
+  events: List<EventTemplate | Event>
+): List<EventTemplate | Event> {
   return events.sortBy((event, index) =>
     parseFloat(`${event.created_at}.${index}`)
   );
 }
 
 export function sortEventsDescending(
-  events: List<UnsignedEvent | Event>
-): List<UnsignedEvent | Event> {
+  events: List<EventTemplate | Event>
+): List<EventTemplate | Event> {
   return events.sortBy(
     (event, index) => [event.created_at, index],
     (a, b) => {
@@ -64,9 +64,9 @@ export function sortEventsDescending(
 
 export function getMostRecentReplacableEvent(
   events:
-    | Collection<string, UnsignedEvent | Event>
-    | List<UnsignedEvent | Event>
-): UnsignedEvent | Event | undefined {
+    | Collection<string, EventTemplate | Event>
+    | List<EventTemplate | Event>
+): EventTemplate | Event | undefined {
   const listOfEvents = List.isList(events) ? events : events.toList();
   return sortEventsDescending(listOfEvents).first(undefined);
 }
@@ -142,7 +142,7 @@ export function useEventQuery(
   };
 }
 
-export function findAllRelays(event: UnsignedEvent): Array<Relay> {
+export function findAllRelays(event: EventTemplate): Array<Relay> {
   const relayTags = findAllTags(event, "r");
   if (!relayTags) {
     return [];

@@ -1,4 +1,4 @@
-import { UnsignedEvent } from "nostr-tools";
+import { EventTemplate } from "nostr-tools";
 import { List, Map } from "immutable";
 import { KIND_RELAY_METADATA_EVENT } from "./nostr";
 import { findAllRelays, getMostRecentReplacableEvent } from "./useNostrQuery";
@@ -29,7 +29,7 @@ export function sanitizeRelays(relays: Array<Relay>): Array<Relay> {
     .filter((r) => r !== undefined) as Array<Relay>;
 }
 
-export function findRelays(events: List<UnsignedEvent>): Relays {
+export function findRelays(events: List<EventTemplate>): Relays {
   const relaysEvent = getMostRecentReplacableEvent(
     events.filter((e) => e.kind === KIND_RELAY_METADATA_EVENT)
   );
