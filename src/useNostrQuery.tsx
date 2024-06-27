@@ -37,17 +37,15 @@ export function findTag(event: EventTemplate, tag: string): string | undefined {
   return allTags && allTags[0] && allTags[0][0];
 }
 
-export function sortEvents(
-  events: List<EventTemplate | Event>
-): List<EventTemplate | Event> {
+export function sortEvents<T extends EventTemplate>(events: List<T>): List<T> {
   return events.sortBy((event, index) =>
     parseFloat(`${event.created_at}.${index}`)
   );
 }
 
-export function sortEventsDescending(
-  events: List<EventTemplate | Event>
-): List<EventTemplate | Event> {
+export function sortEventsDescending<T extends EventTemplate>(
+  events: List<T>
+): List<T> {
   return events.sortBy(
     (event, index) => [event.created_at, index],
     (a, b) => {
@@ -62,11 +60,9 @@ export function sortEventsDescending(
   );
 }
 
-export function getMostRecentReplacableEvent(
-  events:
-    | Collection<string, EventTemplate | Event>
-    | List<EventTemplate | Event>
-): EventTemplate | Event | undefined {
+export function getMostRecentReplacableEvent<T extends EventTemplate>(
+  events: Collection<string, T> | List<T>
+): T | undefined {
   const listOfEvents = List.isList(events) ? events : events.toList();
   return sortEventsDescending(listOfEvents).first(undefined);
 }
