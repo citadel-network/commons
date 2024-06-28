@@ -5,6 +5,7 @@ export * from "./nostr";
 export * from "./relaysUtils";
 export * from "./components/Relays";
 export * from "./components/Ui";
+export * from "./components/ModalNodeComponents";
 export * from "./components/InputElementUtils";
 export * from "./components/LoadingSpinnerButton";
 export * from "./components/FocusContextProvider";

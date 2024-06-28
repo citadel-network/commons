@@ -1,8 +1,8 @@
 import React, { CSSProperties } from "react";
-import { Card, Modal } from "react-bootstrap";
-import * as BS from "react-bootstrap";
+import { Badge as BSBadge, Card } from "react-bootstrap";
+import { Link } from "react-router-dom";
 
-type Children = {
+export type Children = {
   children?: React.ReactNode;
 };
 
@@ -31,7 +31,7 @@ export function Badge({
                 : { top: "-17px", right: "-15px", zIndex: 1 }
             }
           >
-            <BS.Badge
+            <BSBadge
               aria-label={ariaLabel}
               pill
               bg="red"
@@ -39,7 +39,7 @@ export function Badge({
               style={{ fontSize: `${size || 55}%` }}
             >
               {value}
-            </BS.Badge>
+            </BSBadge>
           </div>
         </div>
       )}
@@ -89,6 +89,84 @@ export function UIColumnBody({ children }: Children): JSX.Element {
 
 export function UIColumnHeader({ children }: Children): JSX.Element {
   return <div className="outer-node-title">{children}</div>;
+}
+
+export function UIColumnContent({ children }: Children): JSX.Element {
+  return <div className="overflow-y-auto">{children}</div>;
+}
+
+export function UIColumnFooter({ children }: Children): JSX.Element {
+  return <div className="add-to-node">{children}</div>;
+}
+
+export function AddNodeButton({
+  onClick,
+  ariaLabel,
+  text,
+  isInline,
+  className,
+}: {
+  onClick: () => void;
+  ariaLabel: string;
+  text: string;
+  isInline: boolean;
+  className?: string;
+}): JSX.Element {
+  const defaultClassName = isInline
+    ? "workspace-droppable font-italic font-size-medium black-dimmed hover-black-dimmed"
+    : "workspace-droppable";
+  return (
+    <button
+      type="button"
+      className={
+        className ? `workspace-droppable ${className}` : defaultClassName
+      }
+      aria-label={ariaLabel}
+      onClick={onClick}
+    >
+      {!isInline && <span className="simple-icon-plus me-2" />}
+      <span>{text}</span>
+      <span>{}</span>
+    </button>
+  );
+}
+
+export function UINode({
+  children,
+}: {
+  children?: React.ReactNode;
+}): JSX.Element {
+  return (
+    <div className="inner-node">
+      <Card.Body className="p-2 pb-2 pt-4 d-flex flex-column justify-content-between h-100">
+        {children && children}
+      </Card.Body>
+    </div>
+  );
+}
+
+export function UINodeTitle({ children }: Children): JSX.Element {
+  return (
+    <div className="font-size-big mb-2">
+      <span className="pe-2">{children}</span>
+    </div>
+  );
+}
+
+export function UINodeBody({ children }: Children): JSX.Element {
+  return (
+    <div className="mb-0 h-100">
+      <div className="mb-4">{children}</div>
+    </div>
+  );
+}
+
+export function UINodeFooter({ children }: Children): JSX.Element {
+  return (
+    <div className="mb-2 d-flex justify-content-between align-items-center">
+      {children}
+    </div>
+  );
 }
 
 type SelectboxProps = {
@@ -146,7 +224,7 @@ export function NodeCard({
   );
 }
 
-type BtnProps = {
+export type BtnProps = {
   onClick?: () => void;
   disabled?: boolean;
   ariaLabel?: string;
@@ -173,41 +251,6 @@ export function Button({
     >
       {children && children}
     </button>
-  );
-}
-
-export function ModalNodeTitle({ children }: ModalNodeChildProps): JSX.Element {
-  return <Modal.Body className="flex-row-space-between">{children}</Modal.Body>;
-}
-
-type ModalNodeChildProps = {
-  children?: React.ReactNode;
-};
-
-export function ModalNodeBody({ children }: ModalNodeChildProps): JSX.Element {
-  // I want to remove p-0
-  return <Modal.Body className="flex-col height-100">{children}</Modal.Body>;
-}
-
-type ModalNodeProps = {
-  children?: React.ReactNode;
-  onHide?: () => void;
-  ariaLabel?: string;
-};
-
-const ModalContext = React.createContext<boolean>(false);
-
-export function ModalNode({
-  children,
-  onHide,
-  ariaLabel,
-}: ModalNodeProps): JSX.Element {
-  return (
-    <ModalContext.Provider value>
-      <Modal size="xl" show onHide={onHide} aria-label={ariaLabel}>
-        {children}
-      </Modal>
-    </ModalContext.Provider>
   );
 }
 
@@ -238,4 +281,18 @@ export function StandaloneCard({ children }: Children): JSX.Element {
       </div>
     </div>
   );
+}
+
+export function OptionalLink({
+  children,
+  link,
+}: Children & { link?: string }): JSX.Element {
+  if (link) {
+    return (
+      <Link className="no-underline" to={link}>
+        {children && children}
+      </Link>
+    );
+  }
+  return <>{children && children}</>;
 }

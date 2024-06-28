@@ -1,6 +1,10 @@
 export {};
 
 declare global {
+  type Children = {
+    children?: React.ReactNode;
+  };
+
   type PublicKey = string & { readonly "": unique symbol };
 
   type Relay = {
