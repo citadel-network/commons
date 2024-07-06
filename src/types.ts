@@ -1,4 +1,5 @@
-export {};
+import { Map, List } from "immutable";
+import { Event, UnsignedEvent } from "nostr-tools";
 
 declare global {
   type Children = {
@@ -27,4 +28,27 @@ declare global {
     date?: Date;
     navigateToLink?: string;
   };
+
+  type PublishStatus = {
+    status: "rejected" | "fulfilled";
+    reason?: string;
+  };
+  type PublishResultsOfEvent = {
+    event: Event;
+    results: Map<string, PublishStatus>;
+  };
+  type PublishResultsEventMap = Map<string, PublishResultsOfEvent>;
+
+  type PublishEvents = {
+    unsignedEvents: List<UnsignedEvent>;
+    results: PublishResultsEventMap;
+    isLoading: boolean;
+  };
+
+  type PublishResultsOfRelay = Map<string, Event & PublishStatus>;
+  type PublishResultsRelayMap = Map<string, PublishResultsOfRelay>;
+  type RepublishEvents = (
+    events: List<Event>,
+    relayUrl: string
+  ) => Promise<void>;
 }

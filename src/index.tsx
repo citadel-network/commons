@@ -4,6 +4,7 @@ export * from "./groupedQuery";
 export * from "./nostr";
 export * from "./relaysUtils";
 export * from "./components/Relays";
+export * from "./components/PublishingStatus";
 export * from "./components/Ui";
 export * from "./components/ModalNodeComponents";
 export * from "./components/InputElementUtils";
