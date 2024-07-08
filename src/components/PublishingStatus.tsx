@@ -5,6 +5,22 @@ import { Event } from "nostr-tools";
 import { LoadingSpinnerButton } from "./LoadingSpinnerButton";
 import { getWriteRelays } from "../relaysUtils";
 
+export function mergePublishResultsOfEvents(
+  existing: PublishResultsEventMap,
+  newResults: PublishResultsEventMap
+): PublishResultsEventMap {
+  return newResults.reduce((rdx, results, eventID) => {
+    const existingResults = rdx.get(eventID);
+    if (!existingResults) {
+      return rdx.set(eventID, results);
+    }
+    return rdx.set(eventID, {
+      ...existingResults,
+      results: existingResults.results.merge(results.results),
+    });
+  }, existing);
+}
+
 function transformPublishResults(
   results: PublishResultsEventMap
 ): PublishResultsRelayMap {
