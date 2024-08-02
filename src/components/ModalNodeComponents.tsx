@@ -43,7 +43,11 @@ export function ModalNodeHeader({ children }: Children): JSX.Element {
 
 export function ModalNodeBody({ children }: Children): JSX.Element {
   // I want to remove p-0
-  return <Modal.Body className="flex-col height-100">{children}</Modal.Body>;
+  return (
+    <Modal.Body className="flex-col custom-modal-node-body-height">
+      {children}
+    </Modal.Body>
+  );
 }
 
 export function ModalNodeFooter({ children }: Children): JSX.Element {
