@@ -41,13 +41,16 @@ export function ModalNodeHeader({ children }: Children): JSX.Element {
   );
 }
 
-export function ModalNodeBody({ children }: Children): JSX.Element {
-  // I want to remove p-0
-  return (
-    <Modal.Body className="flex-col custom-modal-node-body-height">
-      {children}
-    </Modal.Body>
-  );
+type ModalNodeBodyProps = {
+  children?: React.ReactNode;
+  className?: string;
+};
+
+export function ModalNodeBody({
+  className,
+  children,
+}: ModalNodeBodyProps): JSX.Element {
+  return <Modal.Body className={className}>{children}</Modal.Body>;
 }
 
 export function ModalNodeFooter({ children }: Children): JSX.Element {
