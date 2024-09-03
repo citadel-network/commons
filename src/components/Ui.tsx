@@ -99,38 +99,6 @@ export function UIColumnFooter({ children }: Children): JSX.Element {
   return <div className="add-to-node">{children}</div>;
 }
 
-export function AddNodeButton({
-  onClick,
-  ariaLabel,
-  text,
-  isInline,
-  className,
-}: {
-  onClick: () => void;
-  ariaLabel: string;
-  text: string;
-  isInline: boolean;
-  className?: string;
-}): JSX.Element {
-  const defaultClassName = isInline
-    ? "workspace-droppable font-italic font-size-medium black-dimmed hover-black-dimmed"
-    : "workspace-droppable";
-  return (
-    <button
-      type="button"
-      className={
-        className ? `workspace-droppable ${className}` : defaultClassName
-      }
-      aria-label={ariaLabel}
-      onClick={onClick}
-    >
-      {!isInline && <span className="simple-icon-plus me-2" />}
-      <span>{text}</span>
-      <span>{}</span>
-    </button>
-  );
-}
-
 export function UINode({
   children,
 }: {
