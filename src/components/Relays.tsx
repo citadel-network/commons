@@ -105,6 +105,7 @@ type RelayDetailsProps = {
   onUpdate: (newRelay: Relay) => void;
   onDelete: () => void;
   isNecessaryReadRelay: boolean;
+  readonly: boolean;
 };
 
 function RelayDetails({
@@ -112,6 +113,7 @@ function RelayDetails({
   onUpdate,
   onDelete,
   isNecessaryReadRelay,
+  readonly,
 }: RelayDetailsProps): JSX.Element {
   const isNecessary = !relay.read && isNecessaryReadRelay;
   return (
@@ -119,43 +121,49 @@ function RelayDetails({
       <div>
         <div className="flex-row-start m-1 mt-2">{relay.url}</div>
         <div className="flex-row-start">
-          <ReadWriteButton
-            isPressed={relay.read}
-            ariaLabel={
-              relay.read
-                ? `stop reading from relay ${relay.url}`
-                : `start reading from relay ${relay.url}`
-            }
-            onClick={() => {
-              onUpdate({ ...relay, read: !relay.read });
-            }}
-          >
-            Read
-          </ReadWriteButton>
-          <ReadWriteButton
-            isPressed={relay.write}
-            ariaLabel={
-              relay.write
-                ? `stop writing to relay ${relay.url}`
-                : `start writing to relay ${relay.url}`
-            }
-            onClick={() => {
-              onUpdate({ ...relay, write: !relay.write });
-            }}
-          >
-            Write
-          </ReadWriteButton>
+          {!readonly && (
+            <>
+              <ReadWriteButton
+                isPressed={relay.read}
+                ariaLabel={
+                  relay.read
+                    ? `stop reading from relay ${relay.url}`
+                    : `start reading from relay ${relay.url}`
+                }
+                onClick={() => {
+                  onUpdate({ ...relay, read: !relay.read });
+                }}
+              >
+                Read
+              </ReadWriteButton>
+              <ReadWriteButton
+                isPressed={relay.write}
+                ariaLabel={
+                  relay.write
+                    ? `stop writing to relay ${relay.url}`
+                    : `start writing to relay ${relay.url}`
+                }
+                onClick={() => {
+                  onUpdate({ ...relay, write: !relay.write });
+                }}
+              >
+                Write
+              </ReadWriteButton>
+            </>
+          )}
         </div>
         {isNecessary && (
           <div className="flex-row-start m-1 danger">{addRelayWarningText}</div>
         )}
       </div>
-      <div className="flex-col-center">
-        <DeleteRelayButton
-          onClick={onDelete}
-          ariaLabel={`delete relay ${relay.url}`}
-        />
-      </div>
+      {!readonly && (
+        <div className="flex-col-center">
+          <DeleteRelayButton
+            onClick={onDelete}
+            ariaLabel={`delete relay ${relay.url}`}
+          />
+        </div>
+      )}
     </RelayCard>
   );
 }
@@ -164,7 +172,7 @@ function SuggestedRelayDetails({
   relay,
   onUpdate,
   isNecessaryReadRelay,
-}: Omit<RelayDetailsProps, "onDelete">): JSX.Element {
+}: Omit<RelayDetailsProps, "onDelete" | "readonly">): JSX.Element {
   const number = (relay as SuggestedRelay).numberOfContacts;
   const infoText =
     number > 1
@@ -284,11 +292,13 @@ export function Relays({
   relays,
   contactsRelays,
   onSubmit,
+  readonly,
 }: {
   defaultRelays: Relays;
   relays: Relays;
   contactsRelays: Map<PublicKey, Relays>;
   onSubmit: (relayState: Relays) => Promise<void>;
+  readonly?: boolean;
 }): JSX.Element {
   const navigate = useNavigate();
   const suggestedRelays = getSuggestedRelays(contactsRelays);
@@ -349,7 +359,8 @@ export function Relays({
     <ModalForm
       submit={() => onSubmit(relayState.myRelays)}
       onHide={() => navigate("/")}
-      title="Edit Nostr Relays"
+      title={readonly ? "Nostr Relays" : "Edit Nostr Relays"}
+      hideFooter={!!readonly}
     >
       <div className="scroll">
         {relayState.myRelays.map((relay: Relay, index: number) => {
@@ -357,6 +368,7 @@ export function Relays({
           return (
             <div key={key}>
               <RelayDetails
+                readonly={!!readonly}
                 relay={relay}
                 onDelete={() => deleteRelay(index)}
                 onUpdate={(newRelay) => {
@@ -371,21 +383,25 @@ export function Relays({
             </div>
           );
         })}
-        {relayState.suggested.map((suggestedRelay: SuggestedRelay) => {
-          const key = `suggested relay ${suggestedRelay.url}`;
-          return (
-            <div key={key}>
-              <SuggestedRelayDetails
-                relay={suggestedRelay}
-                onUpdate={(newRelay) => addRelay(newRelay)}
-                isNecessaryReadRelay={necessaryReadRelays.some(
-                  (r) => r.url === suggestedRelay.url
-                )}
-              />
-            </div>
-          );
-        })}
-        <NewRelay onSave={(newRelay) => addRelay(newRelay)} />
+        {!readonly && (
+          <>
+            {relayState.suggested.map((suggestedRelay: SuggestedRelay) => {
+              const key = `suggested relay ${suggestedRelay.url}`;
+              return (
+                <div key={key}>
+                  <SuggestedRelayDetails
+                    relay={suggestedRelay}
+                    onUpdate={(newRelay) => addRelay(newRelay)}
+                    isNecessaryReadRelay={necessaryReadRelays.some(
+                      (r) => r.url === suggestedRelay.url
+                    )}
+                  />
+                </div>
+              );
+            })}
+            <NewRelay onSave={(newRelay) => addRelay(newRelay)} />
+          </>
+        )}
       </div>
     </ModalForm>
   );
