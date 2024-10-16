@@ -3,7 +3,6 @@ import { List, Map } from "immutable";
 import { Dropdown, Spinner, ProgressBar } from "react-bootstrap";
 import { Event } from "nostr-tools";
 import { LoadingSpinnerButton } from "./LoadingSpinnerButton";
-import { getWriteRelays } from "../relaysUtils";
 
 export function mergePublishResultsOfEvents(
   existing: PublishResultsEventMap,
@@ -168,19 +167,17 @@ function getStatusColor(publishResults: PublishResultsRelayMap): StatusColor {
   return "green";
 }
 
-type PublishingStatusProps = {
+type PublishingStatusProps<T = void> = {
   isMobile: boolean;
-  publishEventsStatus: PublishEvents;
-  relays: Relays;
+  publishEventsStatus: PublishEvents<T>;
   republishEvents: RepublishEvents;
 };
 
-export function PublishingStatus({
+export function PublishingStatus<T = void>({
   isMobile,
   publishEventsStatus,
-  relays,
   republishEvents,
-}: PublishingStatusProps): JSX.Element | null {
+}: PublishingStatusProps<T>): JSX.Element | null {
   if (publishEventsStatus.isLoading === true) {
     return (
       <div style={{ paddingTop: "6px", paddingBottom: "4px" }}>
@@ -194,12 +191,7 @@ export function PublishingStatus({
   const publishResultsRelayMap = transformPublishResults(
     publishEventsStatus.results
   );
-  const writeRelays = getWriteRelays(relays);
-  const publishResultsForActiveWriteRelays = publishResultsRelayMap.filter(
-    (_, relayUrl) =>
-      writeRelays.filter((relay) => relay.url === relayUrl).length > 0
-  );
-  const warningColor = getStatusColor(publishResultsForActiveWriteRelays);
+  const warningColor = getStatusColor(publishResultsRelayMap);
   return (
     <Dropdown>
       <Dropdown.Toggle
@@ -225,7 +217,7 @@ export function PublishingStatus({
             <h2>Publishing Status</h2>
           </div>
         </Dropdown.Item>
-        {publishResultsForActiveWriteRelays
+        {publishResultsRelayMap
           .map((status, relayUrl) => {
             return (
               <RelayPublishStatus

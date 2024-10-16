@@ -39,8 +39,8 @@ declare global {
   };
   type PublishResultsEventMap = Map<string, PublishResultsOfEvent>;
 
-  type PublishEvents = {
-    unsignedEvents: List<UnsignedEvent>;
+  type PublishEvents<T = void> = {
+    unsignedEvents: List<UnsignedEvent & T>;
     results: PublishResultsEventMap;
     isLoading: boolean;
   };
